@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Make Him Shuffle Most!</title>
+  <script type="text/javascript" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0 1rem;
+      background: #fdfdfd;
+      color: #333;
+    }
+    header {
+      background: #20232a;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    h1, h2, h3 {
+      margin-bottom: 0.5rem;
+    }
+    section {
+      margin-top: 2rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    footer {
+      margin-top: 3rem;
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #777;
+    }
+    code {
+      background: #eee;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Make Him Shuffle Most!</h1>
+    <p>A mathematical puzzle on overhand shuffling strategy</p>
+  </header>
+
+  <section id="introduction">
+    <h2>1. Introduction</h2>
+
+    <section id="overhand-shuffle">
+      <h3>1-I. About Overhand Shuffle</h3>
+      <p>
+        The <strong>overhand shuffle</strong> is a common method for mixing cards by transferring
+        small packets from one hand to the other, stacking them in reverse order.
+        In formal terms, it can be modeled as:
+      </p>
+      <p>
+        - Splitting the deck into consecutive segments: \( A, B, C, \dots \)<br/>
+        - Reassembling the deck in reverse chunk order: \( C, B, A \)<br/>
+        - Within each segment, the internal order is preserved.
+      </p>
+      <p>
+        This distinguishes it from a full reversal or riffle shuffle. Overhand shuffle permutations form a proper
+        subgroup of the symmetric group \( S_n \), meaning not all permutations are reachable in one step.
+      </p>
+    </section>
+
+    <section id="about-problem">
+      <h3>1-II. About the Problem</h3>
+      <p>
+        James is a magician restricted to using only overhand shuffles. Suppose he wishes to sort a deck of \( n \)
+        cards into the identity order \( 1, 2, 3, \dots, n \). Your task is to give him a starting permutation that
+        maximizes the number of overhand shuffles needed to restore the sorted state.
+      </p>
+      <p>
+        This leads to the definition of the <em>overhand distance</em> \( d(\pi) \): the number of shuffles needed to
+        transform permutation \( \pi \) to the identity.
+      </p>
+    </section>
+  </section>
+
+  <section id="trials">
+    <h2>2. Trials on Small Cases</h2>
+    <p>
+      We empirically determine the worst permutations for small \( n \).
+    </p>
+    <ul>
+      <li><strong>n = 2</strong>: Max shuffles = 1</li>
+      <li><strong>n = 3</strong>: [1, 3, 2] and [2, 1, 3] require 2 shuffles</li>
+      <li><strong>n = 4</strong>: Max shuffles = 2</li>
+      <li><strong>n = 5–6</strong>: Max shuffles = 3</li>
+      <li><strong>n = 7–10</strong>: Max shuffles = 4</li>
+    </ul>
+    <p>
+      For these small values, brute-force or BFS simulation reveals the maximum overhand distance for each \( n \).
+    </p>
+  </section>
+
+  <section id="insight">
+    <h2>3. Mathematical Insight</h2>
+
+    <section id="lower-bound">
+      <h3>3-I. Lower Bound (quarague)</h3>
+      <p>
+        quarague's approach begins with an <strong>information-theoretic argument</strong>. The number of possible deck permutations is \( n! \), which requires \( \log_2(n!) = \Theta(n \log n) \) bits to distinguish. 
+        Each overhand shuffle is equivalent to choosing whether to break or preserve each pair of adjacent cards, which gives \( 2^{n-1} \) possibilities — only \( n-1 \) bits of information.
+      </p>
+      <p>
+        Therefore, to encode all permutations using overhand shuffles, the minimum number of shuffles required must satisfy:
+      </p>
+      <p>
+        \[
+        k \cdot (n - 1) \geq \log_2(n!) \Rightarrow k \geq rac{\log_2(n!)}{n - 1} = \Omega(\log n)
+        \]
+      </p>
+      <p>
+        Thus, there exist permutations that require at least \( \log n \) shuffles to sort.
+      </p>
+    </section>
+
+    <section id="conjecture">
+      <h3>3-II. Conjecture & Strategy (Ivan Smirnov)</h3>
+      <p>
+        Ivan Smirnov provided a <strong>concrete hard permutation</strong> and analytic tools to measure shuffle complexity.
+        He considered:
+      </p>
+      <p>
+        \[
+        [1, 	frac{n}{2}, 2, 	frac{n}{2} + 1, 3, 	frac{n}{2} + 2, \dots, n]
+        \]
+      </p>
+      <p>
+        and introduced a <em>potential function</em>:
+      </p>
+      <p>
+        \[
+        \Phi(a) = \sum_{i=1}^{n} |a_i - a_{i+1}| \quad 	ext{(with indices mod } n 	ext{)}
+        \]
+      </p>
+      <p>
+        which loosely captures the "unsortedness" of a sequence.
+      </p>
+      <p>
+        He showed that each overhand shuffle — when modeled as reversing the order of blocks — reduces this potential by at most a factor of 3:
+      </p>
+      <p>
+        \[
+        \Phi(	ext{initial}) = \Theta(n^2), \quad \Phi(	ext{sorted}) = \Theta(n) \Rightarrow 	ext{at least } \Omega(\log n) 	ext{ steps required}
+        \]
+      </p>
+      <p>
+        For the upper bound, Smirnov designed a recursive partitioning method resembling quicksort:
+      </p>
+      <p>
+        \[
+        O(\log^2 n)
+        \]
+      </p>
+    </section>
+  </section>
+
+  <footer>
+    &copy; 2025 - Rudeka Kim, <a href="https://math.stackexchange.com/u/979028" target="_blank">RDK</a>
+  </footer>
+</body>
+</html>
